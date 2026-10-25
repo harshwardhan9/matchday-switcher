@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matchday control room</title>
+  <link rel="stylesheet" href="control.css">
+</head>
+<body>
+  <header>
+    <h1>Matchday</h1>
+    <p id="now" class="now">Loading…</p>
+  </header>
+
+  <section class="pad" aria-label="Layout">
+    <button data-cmd="a" class="layout"><span class="big-label" data-label="a">F1</span><small>full screen</small></button>
+    <button data-cmd="b" class="layout"><span class="big-label" data-label="b">El Clásico</span><small>full screen</small></button>
+    <button data-cmd="split" class="layout"><span class="big-label">Side by side</span><small>tap again: swap sound</small></button>
+    <button data-cmd="pip" class="layout"><span class="big-label">Picture in picture</span><small>tap again: swap big/small</small></button>
+    <button data-cmd="sound" class="minor">Swap sound</button>
+    <button data-cmd="mute" class="minor" id="mute">Mute all</button>
+  </section>
+
+  <section class="card">
+    <h2>Streams</h2>
+    <div class="stream" data-key="a">
+      <div class="row">
+        <input class="label-input" data-key="a" aria-label="Stream 1 name">
+        <span class="status" data-status="a"></span>
+      </div>
+      <form class="row go" data-key="a">
+        <input class="url-input" data-key="a" type="url" aria-label="Stream 1 address" spellcheck="false">
+        <button type="submit">Go</button>
+      </form>
+    </div>
+    <div class="stream" data-key="b">
+      <div class="row">
+        <input class="label-input" data-key="b" aria-label="Stream 2 name">
+        <span class="status" data-status="b"></span>
+      </div>
+      <form class="row go" data-key="b">
+        <input class="url-input" data-key="b" type="url" aria-label="Stream 2 address" spellcheck="false">
+        <button type="submit">Go</button>
+      </form>
+    </div>
+    <button data-cmd="open" class="primary" id="open">Open both streams on the TV</button>
+    <label class="display-row">TV screen
+      <select id="display"></select>
+    </label>
+  </section>
+
+  <section class="card remote">
+    <h2>Phone remote</h2>
+    <div id="remote-on" hidden>
+      <div id="qr" class="qr"></div>
+      <p>Scan with your phone's camera, or open <a id="phone-url" target="_blank"></a></p>
+    </div>
+    <p id="remote-off">Off. In Terminal, run <code>python3 remote.py</code> from the matchday folder and this turns into a QR code.</p>
+  </section>
+
+  <section class="card keys">
+    <h2>Keyboard</h2>
+    <p><kbd class="mod"></kbd><kbd>1</kbd> stream 1 &nbsp; <kbd class="mod"></kbd><kbd>2</kbd> stream 2 &nbsp; <kbd class="mod"></kbd><kbd>3</kbd> side by side &nbsp; <kbd class="mod"></kbd><kbd>4</kbd> picture in picture</p>
+    <p class="hint">Works while any Chrome window is in front. Change them at chrome://extensions/shortcuts.</p>
+  </section>
+
+  <p id="error" class="error" hidden></p>
+
+  <script type="module" src="control.js"></script>
+</body>
+</html>
