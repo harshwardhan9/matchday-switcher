@@ -113,6 +113,12 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def handle(self):
+        try:
+            super().handle()
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # the control room closed while we held its /next request open
+
     def log_message(self, *args):
         pass  # keep the terminal quiet; presses are printed in do_POST
 

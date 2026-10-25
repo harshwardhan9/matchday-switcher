@@ -174,7 +174,17 @@ async function handle(msg) {
       s.streams[msg.key].label = msg.label;
       return save(s);
     case 'sync': // control room opened: save defaults without moving windows
+      for (const k of KEYS) if (!(await liveTab(s.streams[k]))) s.streams[k].tabId = null;
       return save(s);
+    case 'forget': // Chrome restarted: the saved tab ids now mean nothing
+      for (const k of KEYS) s.streams[k].tabId = null;
+      return save(s);
+    case 'closed': { // a stream's window was closed, so the UI shows it as closed
+      const k = KEYS.find((key) => s.streams[key].tabId === msg.tabId);
+      if (!k) return;
+      s.streams[k].tabId = null;
+      return save(s);
+    }
     case 'display':
       s.displayId = msg.displayId;
       break;
@@ -208,6 +218,10 @@ chrome.commands.onCommand.addListener((cmd) => run({ cmd }));
 chrome.action.onClicked.addListener(openControlRoom);
 chrome.runtime.onInstalled.addListener(openControlRoom);
 
+// After a restart Chrome hands out tab ids from scratch, so an id we saved
+// could now belong to some unrelated tab and get dragged onto the TV.
+chrome.runtime.onStartup.addListener(() => run({ cmd: 'forget' }));
+
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   run(msg).then(
     () => reply({ ok: true }),
@@ -216,13 +230,6 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   return true; // reply asynchronously
 });
 
-// Forget a stream when its window is closed, so the UI shows it as closed.
-chrome.tabs.onRemoved.addListener(async (tabId) => {
-  await queue;
-  const s = await load();
-  const k = KEYS.find((key) => s.streams[key].tabId === tabId);
-  if (k) {
-    s.streams[k].tabId = null;
-    await save(s);
-  }
-});
+// Goes through the queue like everything else: closing both windows at once
+// would otherwise race, and one save would undo the other.
+chrome.tabs.onRemoved.addListener((tabId) => run({ cmd: 'closed', tabId }));
